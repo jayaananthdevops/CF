@@ -1,0 +1,26 @@
+Parameters:
+  InstanceTypeParameter:
+    Type: String
+    Default: t2.micro
+    AllowedValues:
+      - t2.micro
+      - m1.small
+      - m1.large
+    Description: Enter the InstanceType
+  Keyname: 
+    Type: AWS::EC2::KeyPair::KeyName
+  
+
+Resources: 
+  MyEC2Instance: 
+    Type: AWS::EC2::Instance
+    Properties: 
+      KeyName: !Ref Keyname
+      InstanceType: !Ref InstanceTypeParameter
+      ImageId: "ami-0dc2d3e4c0f9ebd18"
+      UserData:
+        !Base64 |
+        #!/bin/bash
+        yum -y update
+        yum install -y python
+        python --version

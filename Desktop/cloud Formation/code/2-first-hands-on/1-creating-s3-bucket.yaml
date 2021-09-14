@@ -1,0 +1,42 @@
+Parameters:
+    KeyName:
+      Description: Name of an existing EC2 KeyPair to enable SSH access into the WordPress web server
+      Type: AWS::EC2::KeyPair::KeyName
+	
+    Environment:
+      Type: String
+      AllowedValues:
+        - Dev
+        - Prod
+      Description: Choose Dev or Prod
+    
+Mappings:
+    RegionMap: 
+      us-east-1: 
+        HVM64: ami-0ab4d1e9cf9a1215a
+        us-west-1: 
+          HVM64: ami-0bdb828fd58c52235
+    EnvInstanceType:
+      Dev:
+        InstanceType: t2.micro
+    # we want a bigger instance type in production
+      Prod:
+        InstanceType: t2.small
+
+Resources:
+  Ec2Instance:
+    Type: 'AWS::EC2::Instance'
+      Properties:
+        SecurityGroups:
+          - ! Ref InstanceSecurityGroup
+        ImageId:!FindInMap [RegionMap, !Ref 'AWS::Region', HVM64]
+        InstanceType:!FindInMap [EnvInstanceType, !Ref 'Environment', InstanceType]
+  InstanceSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+      Properties:
+        GroupDescription: Enable SSH access via port 22
+        SecurityGroupIngress:
+          - IpProtocol: tcp
+        FromPort: '22'
+        ToPort: '22'
+        CidrIp: 0.0.0.0/0

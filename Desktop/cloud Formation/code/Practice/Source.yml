@@ -1,0 +1,41 @@
+Resources:
+  WebServerHost:
+    Type: 'AWS::EC2::Instance'
+    Properties:
+      AvailabilityZone: us-east-2
+      ImageId: ami-0277b52859bac6f4b
+      IamInstanceProfile: !Ref RootInstanceProfile
+      UserData:
+        'Fn::Base64': |
+          #!/bin/bash
+          yum update -y
+          amazon-linux-extras install -y lamp-mariadb10.2-php7.2 php7.2
+          yum install -y httpd mariadb-server
+
+  AdminRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - 'sts:AssumeRole'
+      Path: /
+      Policies:
+        - PolicyName: codedepl0y
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Effect: Allow
+                Action: '*'
+                Resource: '*'
+  RootInstanceProfile:
+    Type: 'AWS::IAM::InstanceProfile'
+    Properties:
+      Path: /
+      Roles:
+        - !Ref AdminRole
